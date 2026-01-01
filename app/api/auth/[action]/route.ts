@@ -4,6 +4,11 @@ import User from '@/app/models/User';
 import { generateToken, sendTokenResponse } from '@/lib/auth';
 import type { IUser } from '@/types/user';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+
 // POST /api/auth/register
 export async function POST(request: NextRequest) {
   const { pathname } = new URL(request.url);

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/app/models/User';
+import Product from '@/app/models/Product';
 import { requireAuth } from '@/lib/auth';
-import mongoose from 'mongoose';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/cart/wishlist/[productId] - Add to wishlist
 export async function POST(

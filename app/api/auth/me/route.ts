@@ -3,6 +3,9 @@ import connectDB from '@/lib/mongodb';
 import User from '@/app/models/User';
 import { requireAuth } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // GET /api/auth/me
 export async function GET(request: NextRequest) {
   try {
