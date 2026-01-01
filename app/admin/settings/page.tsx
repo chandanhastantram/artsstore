@@ -103,6 +103,8 @@ export default function SettingsPage() {
     }
   };
 
+
+  // Handle nested settings updates with type safety
   const handleChange = (section: string, field: string, value: any) => {
     setSettings(prev => {
       const currentSection = prev[section as keyof typeof prev];
@@ -118,6 +120,7 @@ export default function SettingsPage() {
       return prev;
     });
   };
+
 
   if (loading) {
     return (
