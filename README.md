@@ -5,6 +5,7 @@ A premium e-commerce platform for selling Kundan bangles, handcrafted jewelry, a
 ## 🌟 Features
 
 ### Customer Features
+
 - **3D Product Visualization**: Interactive 3D bangle viewer with real-time customization
 - **AR Try-On**: Virtual try-on using device camera
 - **Product Customization**: Customize thread colors, kundan types, shapes, and colors
@@ -15,6 +16,7 @@ A premium e-commerce platform for selling Kundan bangles, handcrafted jewelry, a
 - **Product Reviews**: Rate and review products
 
 ### Admin Features
+
 - **Two Admin Roles**: Super Admin (full control) and Admin (limited access)
 - **Product Management**: Add, edit, delete products with image uploads
 - **Customization Options Management**: Manage thread and kundan options (Super Admin only)
@@ -27,6 +29,7 @@ A premium e-commerce platform for selling Kundan bangles, handcrafted jewelry, a
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14 with TypeScript
 - **Styling**: Tailwind CSS with custom luxury theme
 - **3D Graphics**: Three.js, React Three Fiber
@@ -36,6 +39,7 @@ A premium e-commerce platform for selling Kundan bangles, handcrafted jewelry, a
 - **Notifications**: React Hot Toast
 
 ### Backend
+
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose
@@ -46,6 +50,7 @@ A premium e-commerce platform for selling Kundan bangles, handcrafted jewelry, a
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
+
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
 - **MongoDB** (local or Atlas cloud)
@@ -53,12 +58,14 @@ Before you begin, ensure you have the following installed:
 ## 🚀 Installation & Setup
 
 ### 1. Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd megaartsstore
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 # Install frontend dependencies
 npm install
@@ -113,6 +120,7 @@ WHATSAPP_PHONE=+919876543210
 ### 4. Start MongoDB
 
 If using local MongoDB:
+
 ```bash
 mongod
 ```
@@ -124,21 +132,25 @@ If using MongoDB Atlas, ensure your connection string is correct in `.env`.
 **Development Mode:**
 
 Terminal 1 - Backend:
+
 ```bash
 cd server
 npm run dev
 ```
 
 Terminal 2 - Frontend:
+
 ```bash
 npm run dev
 ```
 
 The application will be available at:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
 **Production Build:**
+
 ```bash
 npm run build
 npm start
@@ -188,12 +200,14 @@ megaartsstore/
 ## 🎨 Design System
 
 ### Color Palette
+
 - **Ivory**: #FAF9F6 (Base)
 - **Gold**: #D4AF37 (Primary accent)
 - **Maroon**: #800020 (Secondary accent)
 - **Emerald**: #50C878 (Highlights)
 
 ### Typography
+
 - **Headings**: Playfair Display (Serif)
 - **Body**: Inter (Sans-serif)
 
@@ -210,6 +224,7 @@ megaartsstore/
 ## 📱 Responsive Design
 
 The application is fully responsive and optimized for:
+
 - Mobile devices (320px+)
 - Tablets (768px+)
 - Desktop (1024px+)
@@ -225,12 +240,14 @@ npm test
 ## 📦 Deployment
 
 ### Frontend (Vercel)
+
 ```bash
 npm run build
 # Deploy to Vercel
 ```
 
 ### Backend (Heroku/Railway/DigitalOcean)
+
 ```bash
 cd server
 # Deploy to your preferred platform
