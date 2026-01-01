@@ -104,13 +104,19 @@ export default function SettingsPage() {
   };
 
   const handleChange = (section: string, field: string, value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section as keyof typeof prev],
-        [field]: value
+    setSettings(prev => {
+      const currentSection = prev[section as keyof typeof prev];
+      if (typeof currentSection === 'object' && currentSection !== null) {
+        return {
+          ...prev,
+          [section]: {
+            ...currentSection,
+            [field]: value
+          }
+        };
       }
-    }));
+      return prev;
+    });
   };
 
   if (loading) {
