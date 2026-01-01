@@ -1,8 +1,8 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production';
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 
 export interface AuthUser {
@@ -15,9 +15,7 @@ export interface AuthUser {
 
 // Generate JWT token
 export function generateToken(id: string): string {
-  return jwt.sign({ id }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRE,
-  });
+  return jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRE } as any);
 }
 
 // Verify JWT token from request
