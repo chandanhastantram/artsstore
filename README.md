@@ -239,19 +239,17 @@ npm test
 
 ##  Deployment
 
-### Frontend (Vercel)
+### Vercel (Unified Deployment)
+
+This project is configured for unified deployment on Vercel, with both frontend and backend (Next.js API routes) deployed together:
 
 ```bash
 npm run build
-# Deploy to Vercel
+# Deploy to Vercel using the Vercel CLI or GitHub integration
+vercel --prod
 ```
 
-### Backend (Heroku/Railway/DigitalOcean)
-
-```bash
-cd server
-# Deploy to your preferred platform
-```
+The backend Express.js routes have been migrated to Next.js API routes for seamless deployment.
 
 ##  Contributing
 
