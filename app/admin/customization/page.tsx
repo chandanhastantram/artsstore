@@ -51,7 +51,7 @@ export default function AdminCustomizationPage() {
       <CardBody>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold">{title}</h3>
-          <Button size="sm" onClick={() => toast.info('Add feature coming soon')}>
+          <Button size="sm" onClick={() => toast('Add feature coming soon')}>
             <Plus className="w-4 h-4 mr-2" />
             Add {title.slice(0, -1)}
           </Button>
@@ -83,7 +83,7 @@ export default function AdminCustomizationPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => toast.info('Edit feature coming soon')}
+                    onClick={() => toast('Edit feature coming soon')}
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
                   >
                     <Edit className="w-4 h-4" />
