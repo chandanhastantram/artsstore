@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Package, Truck, Home, Download } from 'lucide-react';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ interface Order {
     orderStatus: string;
 }
 
-export default function OrderSuccessPage() {
+function OrderSuccessPageContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId');
     const [order, setOrder] = useState<Order | null>(null);
@@ -240,5 +240,20 @@ export default function OrderSuccessPage() {
                 </motion.div>
             </div>
         </div>
+    );
+}
+
+export default function OrderSuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading order details...</p>
+                </div>
+            </div>
+        }>
+            <OrderSuccessPageContent />
+        </Suspense>
     );
 }
