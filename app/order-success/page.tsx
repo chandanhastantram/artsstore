@@ -9,7 +9,8 @@ import axios from 'axios';
 import confetti from 'canvas-confetti';
 
 export const dynamic = 'force-dynamic';
-
+export const dynamicParams = true;
+export const revalidate = 0;
 
 interface Order {
     _id: string;
