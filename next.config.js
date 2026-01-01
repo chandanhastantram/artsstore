@@ -4,6 +4,9 @@ const nextConfig = {
         domains: ['localhost', 'res.cloudinary.com'],
     },
     transpilePackages: ['three'],
+    experimental: {
+        missingSuspenseWithCSRBailout: false,
+    },
 }
 
 module.exports = nextConfig
