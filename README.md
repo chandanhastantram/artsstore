@@ -2,7 +2,7 @@
 
 A premium e-commerce platform for selling Kundan bangles, handcrafted jewelry, and traditional Indian handicrafts with advanced 3D visualization, AR try-on, and product customization features.
 
-## 🌟 Features
+##  Features
 
 ### Customer Features
 
@@ -55,7 +55,7 @@ Before you begin, ensure you have the following installed:
 - **npm** or **yarn**
 - **MongoDB** (local or Atlas cloud)
 
-## 🚀 Installation & Setup
+##  Installation & Setup
 
 ### 1. Clone the Repository
 
@@ -156,11 +156,11 @@ npm run build
 npm start
 ```
 
-## 👤 Default Admin Credentials
+##  Default Admin Credentials
 
 See `ADMIN_CREDENTIALS.md` for demo admin accounts.
 
-## 📚 Project Structure
+##  Project Structure
 
 ```
 megaartsstore/
@@ -197,7 +197,7 @@ megaartsstore/
 └── package.json            # Dependencies
 ```
 
-## 🎨 Design System
+##  Design System
 
 ### Color Palette
 
@@ -211,7 +211,7 @@ megaartsstore/
 - **Headings**: Playfair Display (Serif)
 - **Body**: Inter (Sans-serif)
 
-## 🔐 Security Features
+##  Security Features
 
 - JWT-based authentication
 - Password hashing with bcrypt
@@ -221,7 +221,7 @@ megaartsstore/
 - Input validation
 - XSS protection
 
-## 📱 Responsive Design
+##  Responsive Design
 
 The application is fully responsive and optimized for:
 
@@ -237,7 +237,7 @@ The application is fully responsive and optimized for:
 npm test
 ```
 
-## 📦 Deployment
+##  Deployment
 
 ### Frontend (Vercel)
 
@@ -253,7 +253,7 @@ cd server
 # Deploy to your preferred platform
 ```
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -265,11 +265,11 @@ cd server
 
 This project is proprietary software. All rights reserved.
 
-## 📞 Support
+##  Support
 
 For support, email support@megaartsstore.com or join our WhatsApp support channel.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - Master artisans of Rajasthan for their craftsmanship
 - The open-source community for amazing tools and libraries
@@ -277,4 +277,3 @@ For support, email support@megaartsstore.com or join our WhatsApp support channe
 
 ---
 
-**Built with ❤️ for preserving Indian heritage craftsmanship**
