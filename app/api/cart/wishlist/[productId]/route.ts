@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/app/models/User';
 import { requireAuth } from '@/lib/auth';
+import mongoose from 'mongoose';
 
 // POST /api/cart/wishlist/[productId] - Add to wishlist
 export async function POST(
@@ -16,14 +17,21 @@ export async function POST(
 
     const fullUser = await User.findById(user._id);
 
-    if (fullUser.wishlist.includes(params.productId)) {
+    if (!fullUser) {
+      return NextResponse.json(
+        { success: false, message: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    if (fullUser.wishlist.some((id: any) => id.toString() === params.productId)) {
       return NextResponse.json(
         { success: false, message: 'Product already in wishlist' },
         { status: 400 }
       );
     }
 
-    fullUser.wishlist.push(params.productId);
+    fullUser.wishlist.push(new mongoose.Types.ObjectId(params.productId));
     await fullUser.save();
 
     return NextResponse.json({
@@ -50,6 +58,13 @@ export async function DELETE(
     if (error) return error;
 
     const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return NextResponse.json(
+        { success: false, message: 'User not found' },
+        { status: 404 }
+      );
+    }
 
     fullUser.wishlist = fullUser.wishlist.filter(
       (id: any) => id.toString() !== params.productId
