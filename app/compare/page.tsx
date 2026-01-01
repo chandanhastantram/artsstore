@@ -10,6 +10,9 @@ import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 
+export const dynamic = 'force-dynamic';
+
+
 interface Product {
     _id: string;
     name: string;

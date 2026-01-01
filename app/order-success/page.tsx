@@ -8,6 +8,9 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 
+export const dynamic = 'force-dynamic';
+
+
 interface Order {
     _id: string;
     orderNumber: string;
