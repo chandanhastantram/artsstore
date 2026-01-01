@@ -10,14 +10,6 @@ import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = false;
-export const dynamicParams = true;
-export async function generateStaticParams() {
-  return [];
-}
-
-
 interface Product {
     _id: string;
     name: string;

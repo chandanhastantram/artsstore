@@ -8,14 +8,6 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = false;
-export const dynamicParams = true;
-export async function generateStaticParams() {
-  return [];
-}
-
-
 interface Order {
     _id: string;
     orderNumber: string;
