@@ -22,9 +22,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (loading) return;
     
     if (pathname === '/admin/login') return;
-    if (!isAuthenticated) {
+    
+    // Check localStorage as fallback if AuthContext hasn't loaded yet
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    
+    if (!isAuthenticated && !token) {
       router.push('/admin/login');
-    } else if (!isAdmin && !isSuperAdmin) {
+    } else if (!isAdmin && !isSuperAdmin && storedUser) {
+      // Check stored user role as fallback
+      try {
+        const userData = JSON.parse(storedUser);
+        if (userData.role !== 'admin' && userData.role !== 'superadmin') {
+          router.push('/');
+        }
+      } catch (e) {
+        router.push('/admin/login');
+      }
+    } else if (!isAdmin && !isSuperAdmin && !storedUser) {
       router.push('/');
     }
   }, [isAuthenticated, isAdmin, isSuperAdmin, router, pathname, loading]);
@@ -46,7 +61,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isAuthenticated || (!isAdmin && !isSuperAdmin)) {
+  // Check localStorage for auth as fallback
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+  let isAuthorized = isAuthenticated && (isAdmin || isSuperAdmin);
+  
+  // Fallback: check localStorage if AuthContext hasn't loaded yet
+  if (!isAuthorized && token && storedUser) {
+    try {
+      const userData = JSON.parse(storedUser);
+      isAuthorized = userData.role === 'admin' || userData.role === 'superadmin';
+    } catch (e) {
+      isAuthorized = false;
+    }
+  }
+
+  if (!isAuthorized) {
     return null;
   }
 
