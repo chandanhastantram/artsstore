@@ -1,13 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input, Textarea } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+interface Settings {
+  storeName: string;
+  storeEmail: string;
+  storePhone: string;
+  storeAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  socialMedia: {
+    whatsapp: string;
+  };
+  contactPage?: {
+    heading: string;
+    subheading: string;
+    email: string;
+    phone: string;
+    address: string;
+    mapEmbedUrl: string;
+    workingHours: string;
+  };
+}
+
 export default function ContactPage() {
+    const [settings, setSettings] = useState<Settings | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -16,6 +42,23 @@ export default function ContactPage() {
         message: '',
     });
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        fetchSettings();
+    }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const response = await fetch('/api/settings');
+            const data = await response.json();
+            
+            if (data.success) {
+                setSettings(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to load settings:', error);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,7 +79,20 @@ export default function ContactPage() {
         }));
     };
 
-    const whatsappNumber = '+919876543210';
+    // Get values from settings or use defaults
+    const pageHeading = settings?.contactPage?.heading || 'Get in Touch';
+    const pageSubheading = settings?.contactPage?.subheading || 'We\'d love to hear from you. Reach out with any questions or inquiries.';
+    const contactEmail = settings?.contactPage?.email || settings?.storeEmail || 'info@megaartsstore.com';
+    const contactPhone = settings?.contactPage?.phone || settings?.storePhone || '+91 98765 43210';
+    const workingHours = settings?.contactPage?.workingHours || 'Mon-Sat, 10 AM - 7 PM IST';
+    const whatsappNumber = settings?.socialMedia?.whatsapp || '+919876543210';
+    const mapEmbedUrl = settings?.contactPage?.mapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d227748.3825624477!2d75.65046970458873!3d26.88514139469916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396c4adf4c57e281%3A0xce1c63a0cf22e09!2sJaipur%2C%20Rajasthan!5e0!3m2!1sen!2sin!4v1234567890';
+
+    // Format address from settings
+    const address = settings?.storeAddress 
+        ? `${settings.storeAddress.street}, ${settings.storeAddress.city}, ${settings.storeAddress.state} ${settings.storeAddress.zip}, ${settings.storeAddress.country}`
+        : '123 Heritage Lane, Jaipur, Rajasthan 302001, India';
+
     const whatsappMessage = 'Hello! I have a question about your products.';
 
     return (
@@ -45,11 +101,11 @@ export default function ContactPage() {
             <section className="section-padding bg-gradient-to-br from-gold-50 to-maroon-50">
                 <div className="container-custom text-center">
                     <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6">
-                        Get in <span className="gradient-text">Touch</span>
+                        {pageHeading.split(' ').slice(0, -1).join(' ')} <span className="gradient-text">{pageHeading.split(' ').slice(-1)}</span>
                     </h1>
                     <div className="gold-divider"></div>
                     <p className="text-xl text-gray-600 mt-6 max-w-2xl mx-auto">
-                        We'd love to hear from you. Reach out with any questions or inquiries.
+                        {pageSubheading}
                     </p>
                 </div>
             </section>
@@ -68,8 +124,10 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-semibold mb-1">Email Us</h3>
-                                            <p className="text-gray-600">info@megaartsstore.com</p>
-                                            <p className="text-gray-600">support@megaartsstore.com</p>
+                                            <p className="text-gray-600">{contactEmail}</p>
+                                            {settings?.storeEmail && settings.storeEmail !== contactEmail && (
+                                                <p className="text-gray-600">{settings.storeEmail}</p>
+                                            )}
                                         </div>
                                     </div>
                                 </CardBody>
@@ -83,8 +141,8 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-semibold mb-1">Call Us</h3>
-                                            <p className="text-gray-600">+91 98765 43210</p>
-                                            <p className="text-sm text-gray-500">Mon-Sat, 10 AM - 7 PM IST</p>
+                                            <p className="text-gray-600">{contactPhone}</p>
+                                            <p className="text-sm text-gray-500">{workingHours}</p>
                                         </div>
                                     </div>
                                 </CardBody>
@@ -99,9 +157,19 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="font-semibold mb-1">Visit Us</h3>
                                             <p className="text-gray-600">
-                                                123 Heritage Lane<br />
-                                                Jaipur, Rajasthan 302001<br />
-                                                India
+                                                {settings?.storeAddress ? (
+                                                    <>
+                                                        {settings.storeAddress.street}<br />
+                                                        {settings.storeAddress.city}, {settings.storeAddress.state} {settings.storeAddress.zip}<br />
+                                                        {settings.storeAddress.country}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        123 Heritage Lane<br />
+                                                        Jaipur, Rajasthan 302001<br />
+                                                        India
+                                                    </>
+                                                )}
                                             </p>
                                         </div>
                                     </div>
@@ -115,7 +183,7 @@ export default function ContactPage() {
                                         <div className="flex-1">
                                             <h3 className="font-semibold mb-2">Chat on WhatsApp</h3>
                                             <a
-                                                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`}
+                                                href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMessage)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="inline-block bg-white text-emerald-600 px-4 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors"
@@ -207,7 +275,7 @@ export default function ContactPage() {
                         <CardBody className="p-0">
                             <div className="h-96 bg-gray-200 rounded-lg overflow-hidden">
                                 <iframe
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d227748.3825624477!2d75.65046970458873!3d26.88514139469916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396c4adf4c57e281%3A0xce1c63a0cf22e09!2sJaipur%2C%20Rajasthan!5e0!3m2!1sen!2sin!4v1234567890"
+                                    src={mapEmbedUrl}
                                     width="100%"
                                     height="100%"
                                     style={{ border: 0 }}

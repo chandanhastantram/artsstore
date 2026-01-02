@@ -1,13 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { uploadInChunks, pollProgress, formatFileSize, calculateETA } from '@/lib/utils/uploadHelpers';
 
 export default function ModelUploadPage() {
     const [uploading, setUploading] = useState(false);
     const [uploadedUrl, setUploadedUrl] = useState('');
     const [error, setError] = useState('');
+    const [progress, setProgress] = useState(0);
+    const [uploadStatus, setUploadStatus] = useState('');
+    const [uploadSpeed, setUploadSpeed] = useState('');
+    const [startTime, setStartTime] = useState(0);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -20,43 +25,90 @@ export default function ModelUploadPage() {
             return;
         }
 
-        // Validate file size (10MB max)
-        if (file.size > 10 * 1024 * 1024) {
-            setError('File size must be less than 10MB');
-            toast.error('File too large. Maximum size is 10MB');
+        // Validate file size (50MB max for models)
+        if (file.size > 50 * 1024 * 1024) {
+            setError('File size must be less than 50MB');
+            toast.error('File too large. Maximum size is 50MB');
             return;
         }
 
         setUploading(true);
         setError('');
-
-        const formData = new FormData();
-        formData.append('model', file);
+        setProgress(0);
+        setUploadedUrl('');
+        setStartTime(Date.now());
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/upload/model', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
+            const fileSize = formatFileSize(file.size);
+            
+            setUploadStatus(`Uploading ${fileSize}...`);
 
-            const data = await response.json();
+            // Use chunked upload for files larger than 2MB
+            if (file.size > 2 * 1024 * 1024) {
+                const response = await uploadInChunks(
+                    file,
+                    '/api/upload/model',
+                    token || '',
+                    (uploadProgress) => {
+                        setProgress(uploadProgress);
+                        const elapsed = Date.now() - startTime;
+                        const bytesUploaded = (file.size * uploadProgress) / 100;
+                        const eta = calculateETA(bytesUploaded, file.size, startTime);
+                        setUploadSpeed(`ETA: ${eta}`);
+                    }
+                );
 
-            if (data.success) {
-                setUploadedUrl(data.url);
-                toast.success('3D model uploaded successfully!');
+                // If background processing, poll for completion
+                if (response.status === 'processing') {
+                    setUploadStatus('Processing model...');
+                    
+                    const result = await pollProgress(
+                        response.uploadId,
+                        token || '',
+                        (processingProgress, status) => {
+                            setProgress(processingProgress);
+                            setUploadStatus(status);
+                        }
+                    );
+                    
+                    setUploadedUrl(result.url);
+                    toast.success('3D model uploaded successfully!');
+                } else {
+                    setUploadedUrl(response.url);
+                    toast.success('3D model uploaded successfully!');
+                }
             } else {
-                setError(data.message || 'Upload failed');
-                toast.error(data.message || 'Upload failed');
+                // Direct upload for smaller files
+                const formData = new FormData();
+                formData.append('model', file);
+
+                const response = await fetch('/api/upload/model', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    setUploadedUrl(data.url);
+                    setProgress(100);
+                    toast.success('3D model uploaded successfully!');
+                } else {
+                    setError(data.message || 'Upload failed');
+                    toast.error(data.message || 'Upload failed');
+                }
             }
         } catch (err: any) {
             setError('Error uploading file');
-            toast.error('Error uploading file');
+            toast.error(err.message || 'Error uploading file');
         } finally {
             setUploading(false);
+            setUploadStatus('');
+            setUploadSpeed('');
         }
     };
 
@@ -81,13 +133,37 @@ export default function ModelUploadPage() {
                             htmlFor="model-upload"
                             className="cursor-pointer flex flex-col items-center"
                         >
-                            <Upload className="w-16 h-16 text-gold-500 mb-4" />
-                            <p className="text-lg font-semibold text-gray-700 mb-2">
-                                {uploading ? 'Uploading...' : 'Click to upload or drag and drop'}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                                .glb or .gltf files only (Max 10MB)
-                            </p>
+                            {uploading ? (
+                                <>
+                                    <Loader2 className="w-16 h-16 text-gold-500 mb-4 animate-spin" />
+                                    <p className="text-lg font-semibold text-gray-700 mb-2">
+                                        {uploadStatus || 'Uploading...'}
+                                    </p>
+                                    <p className="text-sm text-gray-500 mb-4">{uploadSpeed}</p>
+                                    <div className="w-full max-w-md">
+                                        <div className="w-full bg-gray-200 rounded-full h-3">
+                                            <div
+                                                className="bg-gold-500 h-3 rounded-full transition-all duration-300"
+                                                style={{ width: `${progress}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">{Math.round(progress)}%</p>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <Upload className="w-16 h-16 text-gold-500 mb-4" />
+                                    <p className="text-lg font-semibold text-gray-700 mb-2">
+                                        Click to upload or drag and drop
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        .glb or .gltf files only (Max 50MB)
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        Large files will be uploaded in chunks for better performance
+                                    </p>
+                                </>
+                            )}
                         </label>
                     </div>
 
@@ -124,8 +200,8 @@ export default function ModelUploadPage() {
                         <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
                             <li>Make sure you're logged in as admin</li>
                             <li>Click the upload area above</li>
-                            <li>Select your .glb file</li>
-                            <li>Wait for upload to complete</li>
+                            <li>Select your .glb or .gltf file</li>
+                            <li>Wait for upload to complete (large files use chunked upload)</li>
                             <li>Copy the URL to use in products</li>
                         </ol>
                     </div>

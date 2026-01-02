@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { compressImage, uploadInChunks, pollProgress, formatFileSize } from '@/lib/utils/uploadHelpers';
 
 interface UploadedImage {
   url: string;
@@ -22,6 +23,7 @@ interface ImageUploadProps {
 export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+  const [uploadStatus, setUploadStatus] = useState<{ [key: string]: string }>({});
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (images.length + acceptedFiles.length > maxImages) {
@@ -33,29 +35,81 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
 
     try {
       const uploadPromises = acceptedFiles.map(async (file) => {
-        const formData = new FormData();
-        formData.append('image', file);
-
-        // Simulate progress
+        const originalSize = formatFileSize(file.size);
+        
+        // Update status
+        setUploadStatus(prev => ({ ...prev, [file.name]: 'Compressing...' }));
         setUploadProgress(prev => ({ ...prev, [file.name]: 0 }));
 
+        // Compress image if larger than 2MB
+        let fileToUpload = file;
+        if (file.size > 2 * 1024 * 1024) {
+          try {
+            fileToUpload = await compressImage(file);
+            const compressedSize = formatFileSize(fileToUpload.size);
+            console.log(`Compressed ${file.name}: ${originalSize} → ${compressedSize}`);
+          } catch (error) {
+            console.error('Compression failed, using original:', error);
+          }
+        }
+
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5001/api/upload/product-image', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: formData,
-        });
+        
+        // Use chunked upload for files larger than 2MB
+        if (fileToUpload.size > 2 * 1024 * 1024) {
+          setUploadStatus(prev => ({ ...prev, [file.name]: 'Uploading chunks...' }));
+          
+          const response = await uploadInChunks(
+            fileToUpload,
+            '/api/upload/chunked',
+            token || '',
+            (progress) => {
+              setUploadProgress(prev => ({ ...prev, [file.name]: progress }));
+            }
+          );
 
-        setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
+          // If background processing, poll for completion
+          if (response.status === 'processing') {
+            setUploadStatus(prev => ({ ...prev, [file.name]: 'Processing...' }));
+            
+            const result = await pollProgress(
+              response.uploadId,
+              token || '',
+              (progress, status) => {
+                setUploadProgress(prev => ({ ...prev, [file.name]: progress }));
+                setUploadStatus(prev => ({ ...prev, [file.name]: status }));
+              }
+            );
+            
+            return result;
+          }
 
-        const data = await response.json();
-
-        if (data.success) {
-          return data.data;
+          return response.result;
         } else {
-          throw new Error(data.message || 'Upload failed');
+          // Direct upload for smaller files
+          setUploadStatus(prev => ({ ...prev, [file.name]: 'Uploading...' }));
+          
+          const formData = new FormData();
+          formData.append('file', fileToUpload);
+          formData.append('type', 'image');
+
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+          setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
+
+          const data = await response.json();
+
+          if (data.success) {
+            return data.data;
+          } else {
+            throw new Error(data.message || 'Upload failed');
+          }
         }
       });
 
@@ -63,6 +117,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
       onImagesChange([...images, ...uploadedImages]);
       toast.success(`${uploadedImages.length} image(s) uploaded successfully!`);
       setUploadProgress({});
+      setUploadStatus({});
     } catch (error: any) {
       console.error('Upload error:', error);
       toast.error(error.message || 'Failed to upload images');
@@ -76,7 +131,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.avif']
     },
-    maxSize: 5 * 1024 * 1024, // 5MB
+    maxSize: 10 * 1024 * 1024, // 10MB
     disabled: uploading || images.length >= maxImages,
   });
 
@@ -85,7 +140,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
       const token = localStorage.getItem('token');
       const encodedPublicId = encodeURIComponent(publicId);
       
-      const response = await fetch(`http://localhost:5001/api/upload/image/${encodedPublicId}`, {
+      const response = await fetch(`/api/upload?publicId=${encodedPublicId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -138,11 +193,11 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
                     {isDragActive ? 'Drop images here' : 'Drag & drop images here'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    or click to browse (max {maxImages} images, 5MB each)
+                    or click to browse (max {maxImages} images, 10MB each)
                   </p>
                 </div>
                 <p className="text-xs text-gray-400">
-                  Supports: JPG, PNG, WebP, AVIF
+                  Supports: JPG, PNG, WebP, AVIF • Auto-compressed for faster upload
                 </p>
               </>
             )}
@@ -157,7 +212,10 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
             <div key={filename} className="bg-gray-50 rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-gray-700 truncate">{filename}</span>
-                <span className="text-xs text-gray-500">{progress}%</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">{uploadStatus[filename]}</span>
+                  <span className="text-xs text-gray-500">{Math.round(progress)}%</span>
+                </div>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div

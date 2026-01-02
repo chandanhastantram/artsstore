@@ -1,12 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save, RefreshCw } from 'lucide-react';
+import { Save, RefreshCw, Upload, X, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  
   const [settings, setSettings] = useState({
     storeName: '',
     storeEmail: '',
@@ -17,6 +21,27 @@ export default function SettingsPage() {
       state: '',
       zip: '',
       country: 'India'
+    },
+    branding: {
+      logo: '',
+      logoPublicId: '',
+      favicon: '',
+      faviconPublicId: ''
+    },
+    theme: {
+      primaryColor: '#D4AF37',
+      secondaryColor: '#8B0000',
+      accentColor: '#FFF8DC',
+      fontFamily: 'Inter, sans-serif'
+    },
+    banner: {
+      enabled: true,
+      title: '',
+      subtitle: '',
+      image: '',
+      imagePublicId: '',
+      buttonText: '',
+      buttonLink: ''
     },
     socialMedia: {
       facebook: '',
@@ -46,6 +71,20 @@ export default function SettingsPage() {
       address: '',
       mapEmbedUrl: '',
       workingHours: ''
+    },
+    seo: {
+      metaTitle: '',
+      metaDescription: '',
+      metaKeywords: ''
+    },
+    businessHours: {
+      monday: '10:00 AM - 7:00 PM',
+      tuesday: '10:00 AM - 7:00 PM',
+      wednesday: '10:00 AM - 7:00 PM',
+      thursday: '10:00 AM - 7:00 PM',
+      friday: '10:00 AM - 7:00 PM',
+      saturday: '10:00 AM - 7:00 PM',
+      sunday: 'Closed'
     }
   });
 
@@ -70,6 +109,66 @@ export default function SettingsPage() {
       toast.error('Failed to load settings');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File, type: 'logo' | 'favicon' | 'banner') => {
+    const setUploading = type === 'logo' ? setUploadingLogo : type === 'favicon' ? setUploadingFavicon : setUploadingBanner;
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'image');
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (type === 'logo') {
+          setSettings(prev => ({
+            ...prev,
+            branding: {
+              ...prev.branding,
+              logo: data.data.url,
+              logoPublicId: data.data.publicId
+            }
+          }));
+        } else if (type === 'favicon') {
+          setSettings(prev => ({
+            ...prev,
+            branding: {
+              ...prev.branding,
+              favicon: data.data.url,
+              faviconPublicId: data.data.publicId
+            }
+          }));
+        } else {
+          setSettings(prev => ({
+            ...prev,
+            banner: {
+              ...prev.banner,
+              image: data.data.url,
+              imagePublicId: data.data.publicId
+            }
+          }));
+        }
+        toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`);
+      } else {
+        toast.error(data.message || 'Upload failed');
+      }
+    } catch (error) {
+      toast.error('Error uploading image');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -103,8 +202,6 @@ export default function SettingsPage() {
     }
   };
 
-
-  // Handle nested settings updates with type safety
   const handleChange = (section: string, field: string, value: any) => {
     setSettings(prev => {
       const currentSection = prev[section as keyof typeof prev];
@@ -120,7 +217,6 @@ export default function SettingsPage() {
       return prev;
     });
   };
-
 
   if (loading) {
     return (
@@ -138,6 +234,317 @@ export default function SettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Logo & Branding */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Logo & Branding</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Store Logo */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Store Logo
+              </label>
+              {settings.branding?.logo ? (
+                <div className="relative">
+                  <img 
+                    src={settings.branding.logo} 
+                    alt="Store Logo" 
+                    className="w-full h-32 object-contain border rounded-lg p-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleChange('branding', 'logo', '')}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-amber-500">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'logo')}
+                    className="hidden"
+                    disabled={uploadingLogo}
+                  />
+                  {uploadingLogo ? (
+                    <RefreshCw className="w-8 h-8 animate-spin text-amber-600" />
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                      <span className="text-sm text-gray-500">Upload Logo</span>
+                    </>
+                  )}
+                </label>
+              )}
+            </div>
+
+            {/* Favicon */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Favicon
+              </label>
+              {settings.branding?.favicon ? (
+                <div className="relative">
+                  <img 
+                    src={settings.branding.favicon} 
+                    alt="Favicon" 
+                    className="w-full h-32 object-contain border rounded-lg p-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleChange('branding', 'favicon', '')}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-amber-500">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'favicon')}
+                    className="hidden"
+                    disabled={uploadingFavicon}
+                  />
+                  {uploadingFavicon ? (
+                    <RefreshCw className="w-8 h-8 animate-spin text-amber-600" />
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                      <span className="text-sm text-gray-500">Upload Favicon</span>
+                    </>
+                  )}
+                </label>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Theme Colors */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Theme Colors</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Primary Color
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={settings.theme?.primaryColor || '#D4AF37'}
+                  onChange={(e) => handleChange('theme', 'primaryColor', e.target.value)}
+                  className="w-12 h-10 rounded border border-gray-300"
+                />
+                <input
+                  type="text"
+                  value={settings.theme?.primaryColor || '#D4AF37'}
+                  onChange={(e) => handleChange('theme', 'primaryColor', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Secondary Color
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={settings.theme?.secondaryColor || '#8B0000'}
+                  onChange={(e) => handleChange('theme', 'secondaryColor', e.target.value)}
+                  className="w-12 h-10 rounded border border-gray-300"
+                />
+                <input
+                  type="text"
+                  value={settings.theme?.secondaryColor || '#8B0000'}
+                  onChange={(e) => handleChange('theme', 'secondaryColor', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Accent Color
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={settings.theme?.accentColor || '#FFF8DC'}
+                  onChange={(e) => handleChange('theme', 'accentColor', e.target.value)}
+                  className="w-12 h-10 rounded border border-gray-300"
+                />
+                <input
+                  type="text"
+                  value={settings.theme?.accentColor || '#FFF8DC'}
+                  onChange={(e) => handleChange('theme', 'accentColor', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Homepage Banner */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Homepage Banner</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={settings.banner?.enabled}
+                  onChange={(e) => handleChange('banner', 'enabled', e.target.checked)}
+                  className="w-4 h-4 text-amber-600 border-gray-300 rounded"
+                />
+                <span className="text-sm font-medium text-gray-700">Enable Banner</span>
+              </label>
+            </div>
+
+            {settings.banner?.enabled && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Banner Title
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.banner?.title || ''}
+                      onChange={(e) => handleChange('banner', 'title', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Banner Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.banner?.subtitle || ''}
+                      onChange={(e) => handleChange('banner', 'subtitle', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.banner?.buttonText || ''}
+                      onChange={(e) => handleChange('banner', 'buttonText', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Button Link
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.banner?.buttonLink || ''}
+                      onChange={(e) => handleChange('banner', 'buttonLink', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Banner Image
+                  </label>
+                  {settings.banner?.image ? (
+                    <div className="relative">
+                      <img 
+                        src={settings.banner.image} 
+                        alt="Banner" 
+                        className="w-full h-48 object-cover border rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleChange('banner', 'image', '')}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-amber-500">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'banner')}
+                        className="hidden"
+                        disabled={uploadingBanner}
+                      />
+                      {uploadingBanner ? (
+                        <RefreshCw className="w-8 h-8 animate-spin text-amber-600" />
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          <span className="text-sm text-gray-500">Upload Banner Image</span>
+                        </>
+                      )}
+                    </label>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* SEO Settings */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">SEO Settings</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Title
+              </label>
+              <input
+                type="text"
+                value={settings.seo?.metaTitle || ''}
+                onChange={(e) => handleChange('seo', 'metaTitle', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                placeholder="MegaArtsStore - Handcrafted Kundan Bangles"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Description
+              </label>
+              <textarea
+                rows={3}
+                value={settings.seo?.metaDescription || ''}
+                onChange={(e) => handleChange('seo', 'metaDescription', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                placeholder="Discover exquisite handcrafted Kundan bangles..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Keywords
+              </label>
+              <input
+                type="text"
+                value={settings.seo?.metaKeywords || ''}
+                onChange={(e) => handleChange('seo', 'metaKeywords', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                placeholder="kundan bangles, handcrafted jewelry, indian jewelry"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Store Information */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Store Information</h2>

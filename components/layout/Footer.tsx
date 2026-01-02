@@ -35,7 +35,7 @@ export const Footer: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/settings');
+      const response = await fetch('/api/settings');
       const data = await response.json();
       
       if (data.success) {
