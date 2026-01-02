@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              placeholder="admin@megaartsstore.com"
+              placeholder="Enter your email"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
@@ -106,10 +106,13 @@ export default function AdminLoginPage() {
           </Link>
         </div>
 
-        <div className="mt-6 p-4 bg-amber-50 rounded-lg">
-          <p className="text-sm font-semibold text-amber-800 mb-2">Demo Credentials:</p>
-          <p className="text-xs text-amber-700">Super Admin: superadmin@megaartsstore.com / SuperAdmin@123</p>
-          <p className="text-xs text-amber-700">Admin: admin@megaartsstore.com / Admin@123</p>
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-sm text-blue-800">
+            <strong>🔒 Secure Admin Access</strong>
+          </p>
+          <p className="text-xs text-blue-700 mt-1">
+            Admin accounts must be created using the secure CLI tool. Contact your system administrator for access.
+          </p>
         </div>
       </div>
     </div>
