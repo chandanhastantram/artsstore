@@ -51,6 +51,7 @@ export default function AdminLoginPage() {
   };
 
   const goToDashboard = () => {
+    // Force full page reload to ensure AuthContext picks up the token
     window.location.href = '/admin/dashboard';
   };
 
