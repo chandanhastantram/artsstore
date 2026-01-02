@@ -184,6 +184,63 @@ const SettingsSchema = new mongoose.Schema({
     friday: { type: String, default: '10:00 AM - 7:00 PM' },
     saturday: { type: String, default: '10:00 AM - 7:00 PM' },
     sunday: { type: String, default: 'Closed' }
+  },
+  // Homepage Configuration
+  homepage: {
+    // Hero Carousel Slides
+    heroSlides: [{
+      image: { type: String, default: '' },
+      imagePublicId: { type: String, default: '' },
+      title: { type: String, default: '' },
+      subtitle: { type: String, default: '' },
+      buttonText: { type: String, default: 'Shop Now' },
+      buttonLink: { type: String, default: '/shop' },
+      order: { type: Number, default: 0 }
+    }],
+    // Featured Products Section
+    featuredSection: {
+      enabled: { type: Boolean, default: true },
+      title: { type: String, default: 'Featured Collection' },
+      subtitle: { type: String, default: 'Handpicked pieces showcasing our finest craftsmanship' },
+      displayCount: { type: Number, default: 6 },
+      autoPlay: { type: Boolean, default: true },
+      autoPlaySpeed: { type: Number, default: 3000 }
+    },
+    // Feature Cards
+    features: [{
+      icon: { type: String, default: 'Award' },
+      title: { type: String, default: '' },
+      description: { type: String, default: '' },
+      order: { type: Number, default: 0 }
+    }],
+    // Artisan Story Section
+    artisanStory: {
+      enabled: { type: Boolean, default: true },
+      title: { type: String, default: 'Heritage of Craftsmanship' },
+      highlightedText: { type: String, default: 'Craftsmanship' },
+      content: { type: String, default: 'Each piece at MegaArtsStore is a testament to centuries-old traditions passed down through generations of master artisans.' },
+      additionalContent: { type: String, default: 'We work directly with artisan families in Rajasthan, ensuring fair wages and preserving this invaluable cultural heritage.' },
+      buttonText: { type: String, default: 'Learn More About Us' },
+      buttonLink: { type: String, default: '/about' },
+      image: { type: String, default: '' },
+      imagePublicId: { type: String, default: '' }
+    },
+    // Testimonials
+    testimonials: [{
+      name: { type: String, default: '' },
+      rating: { type: Number, default: 5 },
+      comment: { type: String, default: '' },
+      image: { type: String, default: '' },
+      order: { type: Number, default: 0 }
+    }],
+    // CTA Section
+    ctaSection: {
+      enabled: { type: Boolean, default: true },
+      title: { type: String, default: 'Ready to Find Your Perfect Piece?' },
+      subtitle: { type: String, default: 'Explore our collection and create something uniquely yours' },
+      buttonText: { type: String, default: 'Start Shopping' },
+      buttonLink: { type: String, default: '/shop' }
+    }
   }
 }, {
   timestamps: true

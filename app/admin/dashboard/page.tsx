@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardBody } from '@/components/ui/Card';
-import { Package, ShoppingCart, Users, DollarSign, TrendingUp, Clock } from 'lucide-react';
+import { Package, ShoppingCart, Users, DollarSign, TrendingUp, Clock, Layout } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -184,6 +184,16 @@ export default function AdminDashboard() {
               <TrendingUp className="w-12 h-12 text-purple-500 mx-auto mb-3" />
               <h3 className="font-semibold mb-2">Customization Options</h3>
               <p className="text-sm text-gray-600">Manage thread & kundan options</p>
+            </CardBody>
+          </Card>
+        )}
+
+        {isSuperAdmin && (
+          <Card hover className="cursor-pointer" onClick={() => window.location.href = '/admin/homepage'}>
+            <CardBody className="text-center">
+              <Layout className="w-12 h-12 text-pink-500 mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">Edit Homepage</h3>
+              <p className="text-sm text-gray-600">Customize hero, slides & sections</p>
             </CardBody>
           </Card>
         )}
