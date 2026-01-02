@@ -35,7 +35,7 @@ export default function ModelUploadPage() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5001/api/upload/model', {
+            const response = await fetch('/api/upload/model', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

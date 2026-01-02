@@ -19,7 +19,7 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5001/api/products', {
+      const response = await fetch('/api/products', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -37,7 +37,7 @@ export default function AdminProductsPage() {
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5001/api/products/${id}`, {
+      await fetch(`/api/products/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
