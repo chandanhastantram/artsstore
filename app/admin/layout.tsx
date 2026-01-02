@@ -8,7 +8,7 @@ import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut, Palett
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isAdmin, isSuperAdmin, logout, user } = useAuth();
+  const { isAuthenticated, isAdmin, isSuperAdmin, logout, user, loading } = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -18,17 +18,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [pathname]);
 
   useEffect(() => {
+    // Don't redirect while still loading auth state
+    if (loading) return;
+    
     if (pathname === '/admin/login') return;
     if (!isAuthenticated) {
       router.push('/admin/login');
     } else if (!isAdmin && !isSuperAdmin) {
       router.push('/');
     }
-  }, [isAuthenticated, isAdmin, isSuperAdmin, router, pathname]);
+  }, [isAuthenticated, isAdmin, isSuperAdmin, router, pathname, loading]);
 
   // Early return for login page AFTER all hooks
   if (pathname === '/admin/login') {
     return <>{children}</>;
+  }
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated || (!isAdmin && !isSuperAdmin)) {
