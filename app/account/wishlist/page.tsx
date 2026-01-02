@@ -39,7 +39,7 @@ export default function WishlistPage() {
             }
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/cart/wishlist`,
+                '/api/cart/wishlist',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -60,7 +60,7 @@ export default function WishlistPage() {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/cart/wishlist/${productId}`,
+                `/api/cart/wishlist/${productId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

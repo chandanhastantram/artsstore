@@ -41,7 +41,7 @@ export default function LoginPage() {
         toast.success('Welcome back!');
         router.push('/');
       } else {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+        const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),

@@ -122,7 +122,7 @@ export default function CheckoutPage() {
             if (paymentMethod === 'razorpay') {
                 // Create Razorpay order
                 const { data } = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/payment/create-order`,
+                    '/api/payment/create-order',
                     { amount: total },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -138,7 +138,7 @@ export default function CheckoutPage() {
                         try {
                             // Verify payment
                             const verifyResponse = await axios.post(
-                                `${process.env.NEXT_PUBLIC_API_URL}/api/payment/verify`,
+                                '/api/payment/verify',
                                 {
                                     razorpay_order_id: response.razorpay_order_id,
                                     razorpay_payment_id: response.razorpay_payment_id,
@@ -150,7 +150,7 @@ export default function CheckoutPage() {
                             if (verifyResponse.data.success) {
                                 // Create order
                                 const orderResponse = await axios.post(
-                                    `${process.env.NEXT_PUBLIC_API_URL}/api/orders`,
+                                    '/api/orders',
                                     {
                                         items: orderItems,
                                         shippingAddress,
@@ -202,7 +202,7 @@ export default function CheckoutPage() {
             } else {
                 // Cash on Delivery
                 const orderResponse = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/orders`,
+                    '/api/orders',
                     {
                         items: orderItems,
                         shippingAddress,

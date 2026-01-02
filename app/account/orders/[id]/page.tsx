@@ -57,7 +57,7 @@ export default function OrderDetailsPage() {
             }
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/orders/${orderId}`,
+                `/api/orders/${orderId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

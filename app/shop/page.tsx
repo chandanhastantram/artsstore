@@ -67,7 +67,7 @@ export default function EnhancedShopPage() {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products`);
+            const response = await axios.get('/api/products');
             if (response.data.success) {
                 setProducts(response.data.products);
             }
@@ -172,7 +172,7 @@ export default function EnhancedShopPage() {
             }
 
             await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/cart/wishlist/${productId}`,
+                `/api/cart/wishlist/${productId}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );

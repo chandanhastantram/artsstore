@@ -47,7 +47,7 @@ function ComparePageContent() {
         try {
             setLoading(true);
             const promises = productIds.map((id) =>
-                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`)
+                axios.get(`/api/products/${id}`)
             );
             const responses = await Promise.all(promises);
             const fetchedProducts = responses

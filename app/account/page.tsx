@@ -54,7 +54,7 @@ export default function AccountPage() {
             }
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+                '/api/auth/me',
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -91,7 +91,7 @@ export default function AccountPage() {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.put(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`,
+                '/api/users/profile',
                 {
                     name: formData.name,
                     phone: formData.phone,
