@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '@/lib/api';
 
 interface User {
     id: string;
@@ -27,8 +27,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const API_URL = '/api';
-
     useEffect(() => {
         checkAuth();
     }, []);
@@ -37,42 +35,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const token = localStorage.getItem('token');
             if (token) {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                const response = await axios.get(`${API_URL}/auth/me`);
+                const response = await api.get('/auth/me');
                 setUser(response.data.user);
             }
         } catch (error) {
             localStorage.removeItem('token');
-            delete axios.defaults.headers.common['Authorization'];
         } finally {
             setLoading(false);
         }
     };
 
     const login = async (email: string, password: string) => {
-        const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+        const response = await api.post('/auth/login', { email, password });
         const { token, user } = response.data;
         localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setUser(user);
     };
 
     const register = async (name: string, email: string, password: string) => {
-        const response = await axios.post(`${API_URL}/auth/register`, { name, email, password });
+        const response = await api.post('/auth/register', { name, email, password });
         const { token, user } = response.data;
         localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setUser(user);
     };
 
     const logout = async () => {
         try {
-            await axios.post(`${API_URL}/auth/logout`);
+            await api.post('/auth/logout');
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
             localStorage.removeItem('token');
-            delete axios.defaults.headers.common['Authorization'];
             setUser(null);
         }
     };
