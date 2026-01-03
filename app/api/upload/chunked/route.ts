@@ -8,14 +8,9 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
-// Configure for Vercel's payload limits
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '4mb', // Each chunk should be under 4MB
-    },
-  },
-};
+// Configure for Vercel's payload limits (Next.js 14 App Router)
+export const maxDuration = 60; // 60 seconds timeout
+export const dynamic = 'force-dynamic'; // Disable static optimization
 
 // Store for tracking chunk uploads
 const chunkStore = new Map<string, { chunks: Buffer[], totalChunks: number, filename: string }>();

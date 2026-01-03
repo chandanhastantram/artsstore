@@ -6,14 +6,9 @@ import { requireAuth, authorizeRole } from '@/lib/auth';
 import { addModelProcessingJob } from '@/lib/queue/uploadQueue';
 import { isRedisAvailable } from '@/lib/redis';
 
-// Configure for Vercel's payload limits
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '4mb', // 3D models should use chunked upload if larger
-    },
-  },
-};
+// Configure for Vercel's payload limits (Next.js 14 App Router)
+export const maxDuration = 60; // 60 seconds timeout
+export const dynamic = 'force-dynamic'; // Disable static optimization
 
 // POST /api/upload/model - Upload 3D models
 export async function POST(request: NextRequest) {

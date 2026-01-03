@@ -4,14 +4,9 @@ import cloudinary from '@/lib/cloudinary';
 import User from '@/app/models/User';
 import { requireAuth, authorizeRole } from '@/lib/auth';
 
-// Configure for Vercel's payload limits
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '4mb', // Vercel limit is 4.5MB, set to 4MB for safety
-    },
-  },
-};
+// Configure for Vercel's payload limits (Next.js 14 App Router)
+export const maxDuration = 60; // 60 seconds timeout
+export const dynamic = 'force-dynamic'; // Disable static optimization
 
 // Helper function to upload buffer to Cloudinary
 const uploadToCloudinary = (buffer: Buffer, folder: string, resourceType: 'image' | 'raw' = 'image') => {
