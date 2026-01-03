@@ -8,6 +8,15 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
+// Configure for Vercel's payload limits
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4mb', // Each chunk should be under 4MB
+    },
+  },
+};
+
 // Store for tracking chunk uploads
 const chunkStore = new Map<string, { chunks: Buffer[], totalChunks: number, filename: string }>();
 

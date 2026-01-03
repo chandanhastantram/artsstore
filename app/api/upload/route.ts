@@ -4,6 +4,15 @@ import cloudinary from '@/lib/cloudinary';
 import User from '@/app/models/User';
 import { requireAuth, authorizeRole } from '@/lib/auth';
 
+// Configure for Vercel's payload limits
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4mb', // Vercel limit is 4.5MB, set to 4MB for safety
+    },
+  },
+};
+
 // Helper function to upload buffer to Cloudinary
 const uploadToCloudinary = (buffer: Buffer, folder: string, resourceType: 'image' | 'raw' = 'image') => {
   return new Promise((resolve, reject) => {
